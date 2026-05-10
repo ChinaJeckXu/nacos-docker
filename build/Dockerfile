@@ -1,5 +1,5 @@
 FROM alpine:latest
-LABEL maintainer="pader <huangmnlove@163.com>"
+LABEL maintainer="chinajeckxu <chinajeckxu@163.com>"
 
 # 安装依赖
 RUN apk add --no-cache openjdk8-jre-base curl iputils ncurses vim libcurl bash
@@ -23,16 +23,17 @@ ENV MODE="cluster" \
     TOMCAT_ACCESSLOG_ENABLED="false" \
     TIME_ZONE="Asia/Shanghai"
 
-ARG NACOS_VERSION=2.5.2
+ARG NACOS_VERSION=2.5.2_TW
 ARG HOT_FIX_FLAG=""
 
 WORKDIR $BASE_DIR
 
-# 下载并安装 Nacos
+# 复制本地 nacos 安装包并解压（不再从 GitHub 下载）
+COPY nacos-server-${NACOS_VERSION}.tar.gz /tmp/nacos-server.tar.gz
 RUN set -x \
-    && curl -SL "https://github.com/alibaba/nacos/releases/download/${NACOS_VERSION}${HOT_FIX_FLAG}/nacos-server-${NACOS_VERSION}.tar.gz" -o nacos-server.tar.gz \
-    && tar -xzvf nacos-server.tar.gz -C /home \
-    && rm -rf nacos-server.tar.gz /home/nacos/bin/* /home/nacos/conf/*.properties /home/nacos/conf/*.example /home/nacos/conf/nacos-mysql.sql \
+    && tar -xzvf /tmp/nacos-server.tar.gz -C /home \
+    && rm -f /tmp/nacos-server.tar.gz \
+    && rm -rf /home/nacos/bin/* /home/nacos/conf/*.properties /home/nacos/conf/*.example /home/nacos/conf/nacos-mysql.sql \
     && ln -snf /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo $TIME_ZONE > /etc/timezone
 
 ADD bin/docker-startup.sh bin/docker-startup.sh
